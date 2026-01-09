@@ -1,0 +1,33 @@
+name: NGINX GitHub Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t nginx-app .
+
+      - name: Run NGINX container
+        run: |
+          docker run -d -p 8080:80 --name nginx nginx-app
+          sleep 5
+
+      - name: Validate NGINX
+        run: |
+          curl -f http://localhost:8080
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f nginx
+
